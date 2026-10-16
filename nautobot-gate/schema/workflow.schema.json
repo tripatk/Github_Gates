@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "required": ["name", "tenant"],
+  "properties": {
+    "name": {"type": "string"},
+    "tenant": {"const": "AMER DC Net Eng"},
+    "report": {
+      "type": "array",
+      "items": {"enum": ["devices", "ip-addresses"]},
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false
+}
