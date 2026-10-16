@@ -1,0 +1,3 @@
+name: amer-dc-inventory-report
+tenant: "AMER DC Net Eng"
+report: [devices, ip-addresses]

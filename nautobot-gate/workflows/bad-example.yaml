@@ -1,0 +1,3 @@
+name: amer-dc-inventory-report
+tenant: "NoSuchCustomer"
+report: [devices, ip-addresses]
