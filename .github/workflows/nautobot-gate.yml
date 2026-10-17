@@ -1,0 +1,66 @@
+name: nautobot-gate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "nautobot-gate/**"
+      - ".github/workflows/nautobot-gate.yml"
+  pull_request:
+    paths:
+      - "nautobot-gate/**"
+  workflow_dispatch:                 # adds a "Run workflow" button in the Actions tab
+    inputs:
+      workflow_file:
+        description: "Workflow YAML to validate (relative to nautobot-gate/)"
+        default: "workflows/good-example.yaml"
+
+env:
+  # Manual runs use the typed value; push and pull_request runs fall back to the good example.
+  TARGET: ${{ inputs.workflow_file || 'workflows/good-example.yaml' }}
+
+defaults:
+  run:
+    working-directory: nautobot-gate   # our files live in a subfolder of the repo
+
+jobs:
+  schema:
+    name: schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: nautobot-gate/requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Validate shape against workflow.schema.json
+        run: python scripts/validate_schema.py "$TARGET"
+
+  nautobot-compliance:
+    name: nautobot-compliance
+    needs: schema                    # only runs if the cheap offline check passed
+    runs-on: ubuntu-latest
+    env:
+      NAUTOBOT_URL: ${{ secrets.NAUTOBOT_URL }}
+      NAUTOBOT_TOKEN: ${{ secrets.NAUTOBOT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: nautobot-gate/requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Check tenant and build device / IP report
+        run: python scripts/validate_nautobot.py "$TARGET"
+      - name: Show report on the run summary page
+        if: always()
+        run: cat compliance-report.md >> "$GITHUB_STEP_SUMMARY" || true
+      - name: Keep report files as a downloadable artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-report
+          path: nautobot-gate/compliance-report.*
