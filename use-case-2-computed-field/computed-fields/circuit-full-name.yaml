@@ -1,0 +1,8 @@
+name: circuit-full-name
+circuit_id: "141SING177360357239"
+computed_field:
+  content_type: circuits.circuit
+  key: circuit_full_name
+  label: Circuit Full Name
+  template: "{{ obj.cid }}-{{ obj.circuit_type.name }}-{{ obj.provider.name }}"
+  weight: 100

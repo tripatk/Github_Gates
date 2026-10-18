@@ -1,0 +1,6 @@
+requests
+pyyaml
+jsonschema
+jinja2
+pytest
+requests-mock

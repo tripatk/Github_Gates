@@ -1,0 +1,44 @@
+name: uc2-computed-field
+
+on:
+  push:
+    branches: [main]
+    paths: ["use-case-2-computed-field/**"]   # editing the circuit YAML triggers this
+  pull_request:
+    paths: ["use-case-2-computed-field/**"]   # PRs only PLAN, never write
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "YAML under use-case-2-computed-field/"
+        default: "computed-fields/circuit-full-name.yaml"
+      apply:
+        description: "Really write to Nautobot? (false = plan only)"
+        type: boolean
+        default: false
+
+defaults:
+  run:
+    working-directory: use-case-2-computed-field
+
+jobs:
+  computed-field:
+    runs-on: ubuntu-latest
+    env:
+      NAUTOBOT_URL: ${{ secrets.NAUTOBOT_URL }}
+      NAUTOBOT_TOKEN: ${{ secrets.NAUTOBOT_TOKEN }}
+      TARGET: ${{ inputs.file || 'computed-fields/circuit-full-name.yaml' }}
+      # write only on push to main, or when the manual run ticks "apply"
+      FLAGS: ${{ (github.event_name == 'push' || inputs.apply) && '--apply' || '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: use-case-2-computed-field/requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Plan or apply the computed field
+        run: python scripts/apply_computed_field.py "$TARGET" $FLAGS
+      - name: Show report on the run summary page
+        if: always()
+        run: cat computed-field-report.md >> "$GITHUB_STEP_SUMMARY" || true

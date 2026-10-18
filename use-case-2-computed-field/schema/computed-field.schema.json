@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["name", "circuit_id", "computed_field"],
+  "properties": {
+    "name": {"type": "string"},
+    "circuit_id": {"type": "string", "minLength": 1},
+    "computed_field": {
+      "type": "object",
+      "required": ["content_type", "key", "label", "template"],
+      "properties": {
+        "content_type": {"const": "circuits.circuit"},
+        "key": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "label": {"type": "string", "minLength": 1},
+        "template": {"type": "string", "pattern": "\\{\\{.*\\}\\}"},
+        "weight": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
