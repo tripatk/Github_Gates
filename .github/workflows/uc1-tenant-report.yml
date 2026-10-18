@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - "use-case-1-tenant-report/**"
-      - ".github/workflows/nautobot-gate.yml"
+      - ".github/workflows/uc1-tenant-report.yml"
   pull_request:
     paths:
       - "use-case-1-tenant-report/**"
