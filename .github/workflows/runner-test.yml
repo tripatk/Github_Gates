@@ -1,0 +1,9 @@
+name: runner-test
+on: workflow_dispatch        # manual trigger only
+
+jobs:
+  check:
+    runs-on: self-hosted
+    steps:
+      - run: whoami && hostname
+      - run: curl -s -o /dev/null -w "Nautobot HTTP %{http_code}\n" http://localhost:8081/login/
